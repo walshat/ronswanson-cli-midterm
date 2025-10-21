@@ -1,25 +1,27 @@
-# "Office" - The Office Quotes CLI
+# Ron Swanson Quotes CLI
 
+[![Run Python Tests](https://github.com/walshat/ronswanson-cli-midterm/actions/workflows/tests.yml/badge.svg)](https://github.com/walshat/ronswanson-cli-midterm/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
-![Tests](https://github.com/[walshat/is4010-walshat-labs]/actions/workflows/tests.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-A simple Python command-line tool to fetch quotes and character information from "The Office API."
+A simple Python command-line tool to fetch timeless wisdom from Ron Swanson.
 
-## Features
-* Get a random quote from any character.
-* List all available characters from the API.
-* Get a random quote from a specific character.
 
-## API Information
-This project uses the free, open-source [The Office API](https://akashrajpurohit.github.io/the-office-api/) created by Akash Rajpurohit. It requires no authentication.
 
-## Installation
+## 📋 Features
+
+* Get a random Ron Swanson quote.
+* Get a specific number of random quotes.
+* Search for quotes containing a specific word (e.g., "meat", "government").
+
+## 🚀 Installation
+
+To run this project locally, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/](https://github.com/)[walshat/is4010-walshat-labs].git
-    cd is4010-walshat-labs
+    git clone [https://github.com/walshat/ronswanson-cli-midterm.git](https://github.com/walshat/ronswanson-cli-midterm.git)
+    cd ronswanson-cli-midterm
     ```
 
 2.  **Create a virtual environment (recommended):**
@@ -35,54 +37,62 @@ This project uses the free, open-source [The Office API](https://akashrajpurohit
 
 ## Usage
 
-You can run the CLI using `python -m src.main`.
+The CLI is run using `python -m src.main` from the project's root directory.
 
-### View Help
+### Get Help
 To see all available commands and options:
 ```bash
 python -m src.main --help
 ```
 
-### Example Commands
-
-**1. Get a random quote:**
+### Example 1: Get a single random quote
 ```bash
-$ python -m src.main random
-"I'm not superstitious, but I am a little stitious." - Michael
+python -m src.main quote
+```
+**Output:**
+```
+1. "Never half-ass two things. Whole-ass one thing."
 ```
 
-**2. List all available characters:**
+### Example 2: Get multiple quotes
 ```bash
-$ python -m src.main characters
-Available characters:
-- Andy
-- Angela
-- Creed
-- Dwight
-- Jim
-- Kevin
-...
+python -m src.main multiple 3
+```
+**Output:**
+```
+1. "The government is a greedy piglet that suckles on a taxpayer's teat until they have sore, chapped nipples."
+
+2. "There's only one thing I hate more than lying: skim milk. Which is water that's lying about being milk."
+
+3. "Fishing relaxes me. It's like yoga, except I still get to kill something."
 ```
 
-**3. Get a random quote from a specific character:**
+### Example 3: Search for a quote
 ```bash
-$ python -m src.main quote Dwight
-"Identity theft is not a joke, Jim! Millions of families suffer every year!" - Dwight
+python -m src.main search "meat"
 ```
-
-**4. Handle invalid character:**
-```bash
-$ python -m src.main quote Homer
-Error: Character not found.
+**Output:**
+```
+1. "I call this turf ‘n’ turf. It’s a 16-ounce T-bone and a 24-ounce porterhouse. Also, whisky and a cigar. I am going to consume all of this at the same time because I am a free American."
 ```
 
 ## Testing
-This project uses `pytest` for automated testing, including mocking all external API calls.
+
+This project uses `pytest` and `unittest.mock` for testing. All API calls are mocked to ensure tests run quickly and reliably without network dependency.
 
 To run the tests locally:
-1.  Make sure you have installed the dependencies (including `pytest`).
-2.  Run `pytest` from the root of the project:
-
 ```bash
 pytest
 ```
+
+## API Information
+
+This tool uses the free [Ron Swanson Quotes API](https://github.com/jamesseanwright/ron-swanson-quotes), which does not require an API key.
+
+## Technologies Used
+
+* Python 3.10
+* `argparse`
+* `requests`
+* `pytest`
+* GitHub Actions

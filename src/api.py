@@ -1,68 +1,70 @@
+# src/api.py
+"""
+Handles all API calls to the Ron Swanson Quotes API.
+"""
+
 import requests
 
-BASE_URL = "https://officeapi.akashrajpurohit.com"
+BASE_URL = "https://ron-swanson-quotes.herokuapp.com/v2/quotes"
 
 def get_random_quote():
-    """Fetches a single random quote from any character.
+    """
+    Fetches a single random quote from the API.
 
-    Returns
-    -------
-    dict
-        A dictionary containing the 'quote' and 'character' if successful.
-    str
-        An error message if the request fails.
+    Returns:
+        list: A list containing a single quote string, or None if an error occurs.
     """
     try:
-        response = requests.get(f"{BASE_URL}/quotes/random")
-        response.raise_for_status()  # Raises HTTPError for bad responses (4xx or 5xx)
+        response = requests.get(BASE_URL)
+        response.raise_for_status()  # Raise an exception for bad status codes
         return response.json()
-    except requests.exceptions.RequestException as e:
-        return f"Error fetching data: {e}"
+    except requests.RequestException as e:
+        print(f"Error fetching data: {e}")
+        return None
 
-def get_characters():
-    """Fetches a list of all available character names.
+def get_multiple_quotes(count=1):
+    """
+    Fetches a specified number of random quotes.
 
-    Returns
-    -------
-    list
-        A list of character name strings.
-    str
-        An error message if the request fails.
+    Args:
+        count (int): The number of quotes to fetch.
+
+    Returns:
+        list: A list of quote strings, or None if an error occurs.
     """
     try:
-        response = requests.get(f"{BASE_URL}/quotes/characters")
+        # Ensure count is a positive integer
+        count = max(1, int(count))
+        url = f"{BASE_URL}/{count}"
+        response = requests.get(url)
         response.raise_for_status()
         return response.json()
-    except requests.exceptions.RequestException as e:
-        return f"Error fetching data: {e}"
+    except requests.RequestException as e:
+        print(f"Error fetching data: {e}")
+        return None
+    except ValueError:
+        print("Error: Count must be an integer.")
+        return None
 
-def get_character_quote(character_name):
-    """Fetches a random quote from a specific character.
-
-    Parameters
-    ----------
-    character_name : str
-        The name of the character to get a quote from (e.g., "Michael").
-
-    Returns
-    -------
-    dict
-        A dictionary containing the 'quote' and 'character' if successful.
-    str
-        An error message if the request fails or the character is not found.
+def search_quotes(query):
     """
+    Searches for quotes containing a specific term.
+
+    Args:
+        query (str): The search term.
+
+    Returns:
+        list: A list of matching quote strings, or None if an error occurs.
+    """
+    if not query or not isinstance(query, str):
+        print("Error: Search query must be a non-empty string.")
+        return None
+        
     try:
-        # The API uses lowercase names in the URL path
-        formatted_name = character_name.lower()
-        response = requests.get(f"{BASE_URL}/quotes/random/{formatted_name}")
+        url = f"{BASE_URL}/search/{query}"
+        response = requests.get(url)
         response.raise_for_status()
-        
-        data = response.json()
-        
-        # Handle API's specific error message for non-existent characters
-        if data.get("error"):
-            return f"Error: {data['error']}"
-            
-        return data
-    except requests.exceptions.RequestException as e:
-        return f"Error fetching data: {e}"
+        return response.json()
+    except requests.RequestException as e:
+        print(f"Error searching quotes: {e}")
+        return None

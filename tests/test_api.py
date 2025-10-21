@@ -1,74 +1,93 @@
+# tests/test_api.py
+"""
+Tests for the src/api.py functions, using mocking.
+"""
+
 import pytest
 from unittest.mock import patch, MagicMock
 from src import api
 import requests
 
-# Use a consistent mock response for successful quote fetches
-MOCK_QUOTE_RESPONSE = {"quote": "That's what she said.", "character": "Michael"}
-MOCK_CHAR_LIST = ["Michael", "Dwight", "Jim"]
+# Set the path for mocking requests.get
+# It must be the path *where it is used* (i.e., in src.api)
+PATCH_PATH = "src.api.requests.get"
 
-@patch('src.api.requests.get')
+@patch(PATCH_PATH)
 def test_get_random_quote_success(mock_get):
-    """Tests successful fetching of a random quote."""
+    """Tests successful call to get_random_quote."""
     mock_response = MagicMock()
+    mock_response.json.return_value = ["I am Ron Swanson."]
     mock_response.status_code = 200
-    mock_response.json.return_value = MOCK_QUOTE_RESPONSE
     mock_get.return_value = mock_response
 
     result = api.get_random_quote()
-    
-    # Check that 'requests.get' was called correctly
-    mock_get.assert_called_with(f"{api.BASE_URL}/quotes/random")
-    # Check that the function returned the expected data
-    assert result == MOCK_QUOTE_RESPONSE
 
-@patch('src.api.requests.get')
+    # Check that requests.get was called correctly
+    mock_get.assert_called_with(api.BASE_URL)
+    # Check that the function returned the expected JSON
+    assert result == ["I am Ron Swanson."]
+
+@patch(PATCH_PATH)
 def test_get_random_quote_failure(mock_get):
-    """Tests handling of a network error."""
-    # Simulate a requests exception
-    mock_get.side_effect = requests.exceptions.RequestException("Network Error")
+    """Tests a failed API call (e.g., network error)."""
+    # Configure the mock to raise a RequestException
+    mock_get.side_effect = requests.RequestException("Network Error")
 
     result = api.get_random_quote()
     
-    assert "Error fetching data: Network Error" in str(result)
+    # Check that requests.get was called
+    mock_get.assert_called_with(api.BASE_URL)
+    # Check that the function returned None on failure
+    assert result is None
 
-@patch('src.api.requests.get')
-def test_get_characters_success(mock_get):
-    """Tests successful fetching of the character list."""
+@patch(PATCH_PATH)
+def test_get_multiple_quotes_success(mock_get):
+    """Tests successful call to get_multiple_quotes."""
     mock_response = MagicMock()
+    mock_response.json.return_value = ["Quote 1.", "Quote 2.", "Quote 3."]
     mock_response.status_code = 200
-    mock_response.json.return_value = MOCK_CHAR_LIST
     mock_get.return_value = mock_response
 
-    result = api.get_characters()
+    result = api.get_multiple_quotes(3)
     
-    mock_get.assert_called_with(f"{api.BASE_URL}/quotes/characters")
-    assert result == MOCK_CHAR_LIST
-    assert len(result) == 3
+    # Check that requests.get was called with the correct URL
+    mock_get.assert_called_with(f"{api.BASE_URL}/3")
+    # Check the result
+    assert result == ["Quote 1.", "Quote 2.", "Quote 3."]
 
-@patch('src.api.requests.get')
-def test_get_character_quote_success(mock_get):
-    """Tests successful fetching of a quote for a specific character."""
+@patch(PATCH_PATH)
+def test_search_quotes_success(mock_get):
+    """Tests successful call to search_quotes."""
     mock_response = MagicMock()
+    mock_response.json.return_value = ["This is about meat."]
     mock_response.status_code = 200
-    mock_response.json.return_value = MOCK_QUOTE_RESPONSE
     mock_get.return_value = mock_response
-
-    result = api.get_character_quote("Michael")
     
-    # API formats the name to lowercase for the URL
-    mock_get.assert_called_with(f"{api.BASE_URL}/quotes/random/michael")
-    assert result == MOCK_QUOTE_RESPONSE
+    query = "meat"
+    result = api.search_quotes(query)
 
-@patch('src.api.requests.get')
-def test_get_character_quote_not_found(mock_get):
-    """Tests API handling of a character not found."""
-    mock_error = {"error": "Character not found."}
+    # Check that requests.get was called with the correct search URL
+    mock_get.assert_called_with(f"{api.BASE_URL}/search/{query}")
+    # Check the result
+    assert result == ["This is about meat."]
+
+@patch(PATCH_PATH)
+def test_search_quotes_no_results(mock_get):
+    """Tests a successful search that returns no quotes."""
     mock_response = MagicMock()
-    mock_response.status_code = 200  # The API might return 200 with an error object
-    mock_response.json.return_value = mock_error
+    mock_response.json.return_value = []  # API returns empty list for no match
+    mock_response.status_code = 200
     mock_get.return_value = mock_response
 
-    result = api.get_character_quote("NonExistent")
+    result = api.search_quotes("nonexistent")
     
-    assert "Error: Character not found." in result
+    mock_get.assert_called_with(f"{api.BASE_URL}/search/nonexistent")
+    assert result == []
+
+def test_search_quotes_invalid_query():
+    """Tests search_quotes with an invalid query (e.g., None or empty string)."""
+    result_none = api.search_quotes(None)
+    assert result_none is None
+    
+    result_empty = api.search_quotes("")
+    assert result_empty is None
